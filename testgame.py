@@ -16,11 +16,13 @@ character_width, character_height = 65, 65
 enemy_width, enemy_height = 50, 50
 
 menu_background = pygame.image.load(os.path.join('Assets', 'menu_backgroun.png'))
+main_font = pygame.font.SysFont("comicsans", 20)
 
 background = pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'Space Bg 1.png')), (WIDTH, HEIGHT))
 background_earth = pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'earth.png')), (200, 400))
 main_character = pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'tiny_ship1.png')), (character_width, character_width))
 enemy_character = pygame.transform.rotate(pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'tiny_ship5.png')), (enemy_width,enemy_height)), 180)
+
 ship_hit = pygame.transform.scale(pygame.image.load(os.path.join('Assets', 'hit.png')), (50, 50))
 
 bullet_fire = pygame.mixer.Sound(os.path.join('Assets', 'blaster.wav'))
@@ -31,15 +33,22 @@ max_bullets = 5
 hero_hit = pygame.USEREVENT + 1
 enemy_hit = pygame.USEREVENT + 2
 
+
+
+
+
 # SPAWN OBJECTS WINDOW
 
-def draw(hero, enemy, hero_bullets, enemies):
+def draw(hero, enemy, hero_bullets, enemies, lives):
     
     WIN.blit(background, (0,0))
     WIN.blit(background_earth, (300,0))
     WIN.blit(main_character, (hero.x, hero.y))
     WIN.blit(enemy_character, (enemy.x, enemy.y))
     
+
+    lives_label = main_font.render(f"Lives: {lives}", 1, (255,255,255))
+    WIN.blit(lives_label, (10, 10))
     
     
     for bullet in hero_bullets:
@@ -59,35 +68,45 @@ def handle_bullets(hero_bullets, enemy_bullets, hero, enemy):
             pygame.event.post(pygame.event.Event(enemy_hit))
         elif bullet.y < 0:
             hero_bullets.remove(bullet)
-            
-    for bullet in enemy_bullets:
-        bullet.y += bullet_speed 
-        if hero.colliderect(bullet):
-            enemy_bullets.remove(bullet)
-            pygame.event.post(pygame.event.Event(hero_hit))
-        elif enemy_bullets.y > HEIGHT:
-            enemy_bullets.remove(bullet)
     
 # GAME
 
 def main():
-    enemy = pygame.Rect(random.randrange(0,WIDTH),100,enemy_width,enemy_height) # (x position, y position, width, height)
+    enemy = pygame.Rect(random.randrange(0,WIDTH-20),100,enemy_width,enemy_height) # (x position, y position, width, height)
     hero = pygame.Rect(230,420,character_width,character_height)
     
+    lives = 5
+
     hero_bullets = []
     enemy_bullets = []
     
     enemies = []
-
-    #hero_lives = 3
         
     clock = pygame.time.Clock()
     run = True
     while run:
-                
+        
+        
+        
         enemy.y += enemy_speed
         
+        if enemy.y > HEIGHT+1:
+            enemy.y = -30
+            enemy.x = random.randrange(0,WIDTH - enemy_width)
+            lives -= 1
+            if lives == 0:
+                main_menu()
+            
+                       
+            
+        if hero.colliderect(enemy):
+            
+            enemy.y = -30
+            enemy.x = random.randrange(0,WIDTH - enemy_width)
+            pygame.event.post(pygame.event.Event(hero_hit))
+        
         clock.tick(fps)
+        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -100,7 +119,17 @@ def main():
                     bullet_fire.play()
                 
             if event.type == enemy_hit:
+                enemy.x = random.randrange(0,WIDTH - enemy_width)
+                enemy.y = -30
                 collision.play()
+                
+            if event.type == hero_hit:
+                hero.x = 230
+                hero.y = 450
+                lives -= 1
+                collision.play()
+            elif lives == 0:
+                main_menu()
         
         keys_pressed = pygame.key.get_pressed()
         
@@ -115,8 +144,10 @@ def main():
 
         
         handle_bullets(hero_bullets,enemy_bullets,hero,enemy)
-        draw(hero, enemy, hero_bullets, enemies)
-    
+        draw(hero, enemy, hero_bullets, enemies, lives)
+        
+        
+        
     pygame.quit()
 
 # MAIN MENU
