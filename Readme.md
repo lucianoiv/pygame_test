@@ -2,12 +2,12 @@
 
 ## MAIN
 
-![MENU](.\Assets\MENU.jpg)
+![MENU](Assets\MENU.jpg)
 
 Es un juego simple tipo shoot'em-up con una nave que va eliminando enemigos que aparecen al azar. Usando la barra espaciadora el jugador puede disparar y destruir las naves que se acercan. Si las naves chocan contra el jugador o el jugador no las destruye antes de que las naves enemigas salgan de la pantalla, el jugador pierde una vida.
 Si el jugador pierde todas las vidas, el juego se reinicia.
 
-![MENU](.\Assets\GAME.jpg)
+![MENU](Assets\GAME.jpg)
 
 ### Desarrollo
 
